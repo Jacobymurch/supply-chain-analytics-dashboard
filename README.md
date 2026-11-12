@@ -13,7 +13,7 @@ Supply chain operations teams need real-time visibility into inventory distribut
 ## Data Architecture & Modeling
 To ensure fast query performance and accurate cross-filtering, the raw flat exports were transformed and modeled into a normalized **Star Schema** following Microsoft PL-300 best practices:
 
-![Dashboard Preview](image/star-schema.jpg)
+(![Star Schema Data Model](image/star-schema.jpg))
 
 * **Fact Table (inventory_log):** Stores transactional stock levels (StockLevel), TransactionID, Status, and conditional reorder flags (ReorderAlert).
 * **Dimension Tables (products & locations):** Connected to the central fact table via single-direction 1:* relationships using SKU and WarehouseID keys.
@@ -22,5 +22,10 @@ To ensure fast query performance and accurate cross-filtering, the raw flat expo
 ## Key DAX Measures
 All KPI cards and dynamic breakdowns are powered by explicit DAX measures rather than implicit column aggregations:
 
-dax
+```dax
 Total Stock = SUM(inventory_log[StockLevel])
+Urgent Items = 
+CALCULATE(
+    COUNTROWS(inventory_log),
+    inventory_log[ReorderAlert] = "Urgent Review"
+)
